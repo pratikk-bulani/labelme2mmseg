@@ -24,7 +24,8 @@ for json_path in glob.glob(os.path.join(args.input_dir, "*.json")):
             print("Error:", os.path.basename(json_path), shape['label'])
         else:
             class_label = labels_actual[shape['label']]
-            fill_mask_order[class_label] = np.rint(np.array(shape['points']), dtype='int32')
-    for i in fill_mask_order:
-        cv2.fillPoly(seg_mask, pts=[i], color=class_label)
+            fill_mask_order[class_label] = np.rint(np.array(shape['points'])).astype(np.int32)
+    for class_label, mask in enumerate(fill_mask_order):
+        if mask is not None:
+            cv2.fillPoly(seg_mask, pts=[mask], color=class_label)
     cv2.imwrite(os.path.join(args.output_dir, os.path.splitext(os.path.basename(json_path))[0] + ".png"), seg_mask)
