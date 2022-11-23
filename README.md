@@ -13,7 +13,7 @@ python ./labelme2mmseg.py -i <path consisting of all the json files> -o <path wh
 ```
 
 The first line of the label file NEED NOT be: ```_background_```
-The remaining lines should be the labels like:
+The lines should of the label file should be like:
 ```
 car
 horse
