@@ -10,6 +10,8 @@ def parse_args():
 args = parse_args()
 
 os.makedirs(args.output_dir, exist_ok=True)
+os.makedirs(os.path.join(args.output_dir, 'annotations'), exist_ok=True)
+os.makedirs(os.path.join(args.output_dir, 'images'), exist_ok=True)
 
 with open(args.label_file) as f:
     labels_actual = {l.replace("\n", ""):i for i, l in enumerate(f.readlines())}
@@ -17,7 +19,7 @@ with open(args.label_file) as f:
 for json_path in glob.glob(os.path.join(args.input_dir, "*.json")):
     with open(json_path, 'r') as f:
         json_content = json.load(f)
-    seg_mask = np.zeros(shape=(json_content['imageHeight'], json_content['imageWidth']), dtype=np.uint8)
+    seg_mask = 255*np.ones(shape=(json_content['imageHeight'], json_content['imageWidth']), dtype=np.uint8)
     fill_mask_order = [None] * len(labels_actual)
     for shape in json_content['shapes']:
         if shape['label'] not in labels_actual:
@@ -28,4 +30,8 @@ for json_path in glob.glob(os.path.join(args.input_dir, "*.json")):
     for class_label, mask in enumerate(fill_mask_order):
         if mask is not None:
             cv2.fillPoly(seg_mask, pts=[mask], color=class_label)
-    cv2.imwrite(os.path.join(args.output_dir, os.path.splitext(os.path.basename(json_path))[0] + ".png"), seg_mask)
+    cv2.imwrite(os.path.join(args.output_dir, 'annotations', os.path.splitext(os.path.basename(json_path))[0] + ".png"), seg_mask)
+    try:
+        cv2.imwrite(os.path.join(args.output_dir, 'images', os.path.splitext(os.path.basename(json_path))[0] + ".jpg"), cv2.imread(json_content['imagePath']))
+    except:
+        print("Error: Image path in", os.path.basename(json_path))
