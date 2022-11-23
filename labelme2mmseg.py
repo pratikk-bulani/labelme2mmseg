@@ -26,7 +26,7 @@ for json_path in glob.glob(os.path.join(args.input_dir, "*.json")):
             print("Error:", os.path.basename(json_path), shape['label'])
         else:
             class_label = labels_actual[shape['label']]
-            fill_mask_order.append(np.rint(np.array(shape['points'])).astype(np.int32))
+            fill_mask_order[class_label].append(np.rint(np.array(shape['points'])).astype(np.int32))
     for class_label, mask in enumerate(fill_mask_order):
         for m in mask:
             cv2.fillPoly(seg_mask, pts=[m], color=class_label)
