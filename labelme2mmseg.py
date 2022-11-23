@@ -20,16 +20,16 @@ for json_path in glob.glob(os.path.join(args.input_dir, "*.json")):
     with open(json_path, 'r') as f:
         json_content = json.load(f)
     seg_mask = 255*np.ones(shape=(json_content['imageHeight'], json_content['imageWidth']), dtype=np.uint8)
-    fill_mask_order = [None] * len(labels_actual)
+    fill_mask_order = [[] for i in range(len(labels_actual))]
     for shape in json_content['shapes']:
         if shape['label'] not in labels_actual:
             print("Error:", os.path.basename(json_path), shape['label'])
         else:
             class_label = labels_actual[shape['label']]
-            fill_mask_order[class_label] = np.rint(np.array(shape['points'])).astype(np.int32)
+            fill_mask_order.append(np.rint(np.array(shape['points'])).astype(np.int32))
     for class_label, mask in enumerate(fill_mask_order):
-        if mask is not None:
-            cv2.fillPoly(seg_mask, pts=[mask], color=class_label)
+        for m in mask:
+            cv2.fillPoly(seg_mask, pts=[m], color=class_label)
     cv2.imwrite(os.path.join(args.output_dir, 'annotations', os.path.splitext(os.path.basename(json_path))[0] + ".png"), seg_mask)
     try:
         cv2.imwrite(os.path.join(args.output_dir, 'images', os.path.splitext(os.path.basename(json_path))[0] + ".jpg"), cv2.imread(json_content['imagePath']))
